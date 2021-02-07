@@ -1,18 +1,21 @@
 const authController = require('../controllers/auth.controller').authController;
+const auth = require('../config/auth').auth;
+const express = require('express');
+const router = express.Router();
 
-var express = require('express');
-var router = express.Router();
+router.post('/login', async (req, res) => {
+    const authData = await authController.authenticate(req.body.username, req.body.password);
 
-router.post('/login', async (req, res, next) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const success = await authController.authenticate (username, password);
-    if (success){
-        res.send('ok')
+    if (authData === null) {
+        res.status(401).send("Incorrect password or username!");
+        return;
     }
-    else{
-        res.status(401).send("incorrect password or username")
-    }
+
+    res.json({
+        status: 'ok',
+        ...authData
+    });
 });
+
 
 module.exports = router;
